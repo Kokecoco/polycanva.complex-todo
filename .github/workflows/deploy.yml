@@ -1,0 +1,48 @@
+# GitHub Pages へのデプロイを許可するワークフロー
+name: Deploy to GitHub Pages
+
+# main ブランチへのプッシュ時にこのワークフローを実行します
+on:
+  push:
+    branches: [ "main" ] # あなたのメインブランチ名に合わせてください (master の場合もあります)
+  workflow_dispatch:
+
+# GITHUB_TOKEN の権限を設定し、GitHub Pages へのデプロイを許可します
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# 1つの並行デプロイメントのみを許可します
+concurrency:
+  group: "pages"
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18 # プロジェクトに合わせたバージョンを指定
+          cache: 'npm'
+      - name: Install dependencies
+        run: npm install
+      - name: Build
+        run: npm run build
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          # Viteのビルド出力ディレクトリ (dist) をアップロードします
+          path: './dist'
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
