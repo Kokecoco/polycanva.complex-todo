@@ -30,18 +30,22 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 18 # プロジェクトに合わせたバージョンを指定
+          node-version: 18
           cache: 'npm'
       - name: Install dependencies
         run: npm install
+
+      # ↓↓↓ このステップを修正します ↓↓↓
       - name: Build
         run: npm run build
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }} # このenvセクションを追加
+
       - name: Setup Pages
         uses: actions/configure-pages@v5
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          # Viteのビルド出力ディレクトリ (dist) をアップロードします
           path: './dist'
       - name: Deploy to GitHub Pages
         id: deployment
